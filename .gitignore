@@ -1,0 +1,15 @@
+# Virtual environments
+.venv/
+
+# Local env/config
+.env
+
+# Caches and bytecode
+__pycache__/
+*.py[cod]
+.DS_Store
+
+# Agent state and checkpoints
+.memory/
+mem/
+.langgraph_api/

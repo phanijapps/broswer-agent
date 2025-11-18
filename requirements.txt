@@ -1,0 +1,18 @@
+langchain > 1.0.0
+langgraph-cli[inmem]
+langgraph-api
+langchain-anthropic
+deepagents
+langchain-openai
+langchain-ollama
+langchain-anthropic
+langchain-mcp-adapters
+langchain-chroma
+langgraph-checkpoint-sqlite
+networkx>3.0
+chromadb>=0.5.5
+pypdf>3.0.0
+python-dotenv
+pydantic-settings
+json_repair
+aiosqlite

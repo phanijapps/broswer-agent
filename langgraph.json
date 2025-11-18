@@ -1,0 +1,9 @@
+{
+    "dependencies": [
+        "./cu"
+    ],
+    "graphs": {
+        "cu_agent":  "./cu/agent.py:cu_agent"
+    },
+    "env": ".env"
+}
