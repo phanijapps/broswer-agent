@@ -16,3 +16,18 @@ Small LangGraph/LangChain agent that drives the browser through the Chrome DevTo
 ## Notes
 - Set `STORAGE_LOCATION` in `.env` if you want memory/checkpoints in a different folder.
 - If `uv` is missing, install it first (`pip install uv`) before running the scripts.
+
+
+## Experimental
+```bash
+
+docker build -t chrome-mcp-debian:latest .
+
+
+docker run -d \
+  --name chrome-mcp-container \
+  -p 5901:5901 \
+  -p 6901:6901 \
+  -p 9223:9223 \
+  chrome-mcp-debian:latest
+```

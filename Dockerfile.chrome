@@ -1,0 +1,42 @@
+FROM accetto/debian-vnc-xfce-chromium-g3:latest
+
+USER root
+
+# Install Node.js and socat
+RUN apt-get update && \
+    apt-get install -y curl socat && \
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create startup script
+RUN echo '#!/bin/bash\n\
+# Start Chromium with remote debugging\n\
+chromium --remote-debugging-port=9222 \
+--user-data-dir=/tmp/chromium-profile \
+--no-first-run \
+--no-default-browser-check \
+--no-sandbox \
+--disable-dev-shm-usage &\n\
+\n\
+# Wait for Chromium to start\n\
+sleep 5\n\
+\n\
+# Start socat port forwarding\n\
+socat tcp-listen:9223,fork,bind=0.0.0.0 tcp:127.0.0.1:9222 &\n\
+' > /dockerstartup/start-chromium.sh && \
+    chmod +x /dockerstartup/start-chromium.sh
+
+# Modify the container startup to include Chromium launch
+RUN echo '#!/bin/bash\n\
+/dockerstartup/start-chromium.sh &\n\
+exec /dockerstartup/startup.sh' > /dockerstartup/vnc_startup_with_chrome.sh && \
+    chmod +x /dockerstartup/vnc_startup_with_chrome.sh
+
+USER 1000
+
+EXPOSE 5901 6901 9223
+
+# Override entrypoint to use our custom startup
+CMD ["/dockerstartup/vnc_startup_with_chrome.sh"]

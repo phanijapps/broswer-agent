@@ -81,6 +81,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
+from rich.markdown import Markdown
 import json
 
 class RichLoggingMiddleware(AgentMiddleware):
@@ -135,11 +136,17 @@ class RichLoggingMiddleware(AgentMiddleware):
         # AI RESPONSE LOG
         # --------------------
         if isinstance(last, AIMessage):
-            resp = Text.assemble(
-                ("🤖  AI Response\n", "bold green"),
-                ("\n" + last.content, "white"),
-            )
-            self.console.print(resp)
+          #  resp = Text.assemble(
+           #     ("🤖  AI Response\n", "bold green"),
+           #     ("\n" + last.content, "white"),
+           # )
+            self.console.print(Panel(
+                Markdown(last.content),
+                title="🤖  AI Response",
+                border_style="green"
+
+            ))
+            #self.console.print(resp)
 
             # --------------------
             # TOOL CALLS

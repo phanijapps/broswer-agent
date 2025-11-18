@@ -49,12 +49,14 @@ Respond thoughtfully and engagingly. Use tables for comparisons or lists when ef
 async def get_browser_mcp():
     mcp_config = MultiServerMCPClient(
         {
-            "playright": {
+           "chrome-devtools": {
                 "transport": "stdio",
                 "command": "npx",
-                "args": ["chrome-devtools-mcp@latest",
-                         "--headless", "false"
-                         ]
+                "args": [
+                    "-y",
+                    "chrome-devtools-mcp@latest",
+                    "--browserUrl=http://localhost:9223"
+                ]
             }
         }
     )
@@ -97,39 +99,53 @@ async def repl():
     console.print("[bold cyan]💻 Computer Use Agent started. Type 'exit' to quit.[/bold cyan]")
 
     messages = []
-
-    # Enter context ONCE here
+    thread_id = None  # Track thread across turns
 
     try:
         while True:
-            # Rich input prompt
             user_input = console.input("[bold green]🧑 You:[/bold green] ").strip()
 
-            if user_input.lower() in ("exit", "quit"):
+            # -------------------------------
+            # Slash Command Handling
+            # -------------------------------
+            if user_input.lower() in ("/exit", "/bye", "exit", "quit"):
                 console.print("[bold yellow]👋 Exiting. Goodbye![/bold yellow]")
                 break
+
+            if user_input.lower() == "/new":
+                thread_id = str(uuid.uuid4())
+                messages = []
+                console.print(f"[bold blue]✨ New thread created:[/bold blue] {thread_id}")
+                continue
+            # -------------------------------
+
             if not user_input:
                 continue
 
+            # Append user message
             messages.append({"role": "user", "content": user_input})
+
+            # If thread_id is missing, generate it
+            if thread_id is None:
+                thread_id = str(uuid.uuid4())
+                console.print(f"[bold blue]🧵 Starting new thread:[/bold blue] {thread_id}")
 
             config = {
                 "recursion_limit": 100,
-                "configurable": {"thread_id": str(uuid.uuid4())}
+                "configurable": {"thread_id": thread_id}
             }
 
             try:
                 result = await agent.ainvoke({"messages": messages}, config=config)
                 output = result.get("content", str(result))
 
-                # Rich AI Output Panel
-                console.print(
-                    Panel(
-                        Markdown(output),
-                        title="🤖 AI",
-                        border_style="blue",
-                    )
-                )
+             #   console.print(
+              #      Panel(
+              #          Markdown(output),
+              #          title="🤖 AI",
+              #          border_style="blue",
+              #      )
+              #  )
 
                 messages.append({"role": "assistant", "content": output})
 
@@ -144,6 +160,7 @@ async def repl():
 
     finally:
         await saver_cm.__aexit__(None, None, None)
+
 
 if __name__ == "__main__":
     asyncio.run(repl())
