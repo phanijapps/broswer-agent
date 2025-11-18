@@ -16,3 +16,4 @@ python-dotenv
 pydantic-settings
 json_repair
 aiosqlite
+rich

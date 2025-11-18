@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 from cu.utils.embedding_factory import get_embeddings_by_name
 from cu.utils.llm_factory import LLMFactory, ModelProvider
-from cu.utils.logging_middleware import LoggingMiddleware
+from cu.utils.logging_middleware import LoggingMiddleware, RichLoggingMiddleware
 import sqlite3
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver 
 from typing import Optional
