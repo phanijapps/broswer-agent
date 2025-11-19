@@ -1,33 +1,26 @@
-# Browser use agent with Chrome Dev Tools MCP and Langchain
+FROM accetto/debian-vnc-xfce-chromium-g3:latest
 
-Small LangGraph/LangChain agent that drives the browser through the Chrome DevTools MCP client. Uses DeepSeek for the LLM, Ollama embeddings for memory, and stores state in SQLite/Chroma under `./mem`.
+USER root
 
-## What you need
-- Python 3.13+
-- `uv` CLI (`pip install uv`)
-- Chrome installed (for the MCP tool)
-- Ollama running locally with the `nomic-embed-text` model, or change the embedding provider in `cu/utils/__init__.py`
+# Install Node.js
+RUN apt-get update && \
+    apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-## Setup and run
-1) Copy `.env_example` to `.env` and set at least `DEEPSEEK_API_KEY`. `LANGSMITH_API_KEY` is optional; `OPENROUTER_API_KEY` is only needed if you switch providers.
-2) From the repo root run `./run.sh` (Linux/Mac) or `./run.ps1` (Windows). The script will create `.venv` with `uv venv --python=3.13` if missing, install `requirements.txt`, and start `python -m cu.agent`.
-3) Type your requests in the REPL; type `exit` to quit.
+# Install Playwright and @playwright/mcp globally
+RUN npm install -g playwright@latest @playwright/mcp@latest
 
-## Notes
-- Set `STORAGE_LOCATION` in `.env` if you want memory/checkpoints in a different folder.
-- If `uv` is missing, install it first (`pip install uv`) before running the scripts.
+# Install browsers
+RUN npx playwright install --with-deps chrome
 
+# Setup screenshots directory
+RUN mkdir -p /home/headless/screenshots && \
+    chown -R 1000:1000 /home/headless/screenshots
 
-## Experimental
-```bash
+USER 1000
 
-docker build -t chrome-mcp-debian:latest .
+EXPOSE 5901 6901
 
-
-docker run -d \
-  --name chrome-mcp-container \
-  -p 5901:5901 \
-  -p 6901:6901 \
-  -p 9223:9223 \
-  chrome-mcp-debian:latest
-```
+# Use the base image's default startup - DON'T OVERRIDE

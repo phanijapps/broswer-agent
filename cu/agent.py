@@ -62,6 +62,19 @@ async def get_browser_mcp():
     )
     return await mcp_config.get_tools()
 
+async def get_playwright_mcp():
+    """Connect via docker exec stdio"""
+    mcp_config = MultiServerMCPClient(
+        {
+            "playwright": {
+                "transport": "sse",
+                "url": "http://localhost:8931/sse",
+            
+            }
+        }
+    )
+    return await mcp_config.get_tools()
+
 async def build_agent():
     episodic = EpisodicMemory(
         embeddings=get_nomic_embed(),
@@ -70,7 +83,7 @@ async def build_agent():
     memory_tools = MemoryToolFactory(memory=episodic)
     tools = memory_tools.get_tools()
 
-    browser_tools = await get_browser_mcp()
+    browser_tools = await get_playwright_mcp()
     tools.extend(browser_tools)
 
     # Create the context manager
@@ -86,7 +99,9 @@ async def build_agent():
         checkpointer=saver,   # ✔ PASS S A V E R, not CM
         middleware=[
             TodoListMiddleware(),
-            SummarizationMiddleware(...),
+            SummarizationMiddleware(max_tokens_before_summary=10000,
+                                    model=get_deepseek_llm(),
+                                    messages_to_keep=6),
             RichLoggingMiddleware(agent_name="Computer Use")
         ]
     )

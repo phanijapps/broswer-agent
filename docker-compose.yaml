@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  playwright-vnc:
+    build: .
+    container_name: playwright-vnc
+    ports:
+      - "5901:5901"  # VNC
+      - "6901:6901"  # noVNC
+      - "8931:8931"  # Playwright MCP
+    volumes:
+      - ./screenshots:/home/headless/screenshots
+      - ./scripts:/home/headless/scripts  # Optional: for custom scripts
+    shm_size: '2gb'
+    environment:
+      - DISPLAY=:1
+      - VNC_PW=
+    restart: unless-stopped
